@@ -4,7 +4,7 @@ using UnityEngine;
 
 public static class MeshGenerator {
 
-    public static MeshData GenerateTerrainMesh(float[,] heightMap) {
+    public static MeshData GenerateTerrainMesh(float[,] heightMap, float heightMultiplier, AnimationCurve heightCurve) {
         int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
 
@@ -18,7 +18,7 @@ public static class MeshGenerator {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
 
-                meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightMap[x, y], topLeftZ - y);
+                meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightCurve.Evaluate(heightMap[x, y]) * heightMultiplier, topLeftZ - y);
                 meshData.uvs[vertexIndex] = new Vector2(x / (float) width, y / (float) height);
 
                 // only draw vertices for top and left sides of the map (avoid duplicates)
@@ -43,11 +43,10 @@ public class MeshData {
 
     int triangleIndex;
 
-
-    public MeshData(int width, int height) {
-        vertices = new Vector3[width * height];
-        uvs = new Vector2[width * height];
-        triangles = new int[(width - 1) * (height - 1) * 6];
+    public MeshData(int meshWidth, int meshHeight) {
+        vertices = new Vector3[meshWidth * meshHeight];
+        uvs = new Vector2[meshWidth * meshHeight];
+        triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6];
     }
 
     public void AddTriangle(int a, int b, int c) {
