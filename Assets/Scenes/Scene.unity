@@ -257,7 +257,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8041f34738afa46fcb3f14b12730f294, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  autoUpdate: 1
   mapWidth: 100
   mapHeight: 100
-  noiseScale: 8.57
-  autoUpdate: 1
+  noiseScale: 28
+  octaves: 4
+  persistence: 0.54
+  lacunarity: 2.41
+  seed: 0
+  offset: {x: 0, y: 0}
