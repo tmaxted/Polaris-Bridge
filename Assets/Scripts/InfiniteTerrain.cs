@@ -5,8 +5,10 @@ using UnityEngine;
 public class InfiniteTerrain : MonoBehaviour {
     public const float maxViewDist = 300;
     public Transform viewer;
+    public Material mapMaterial;
 
     public static Vector2 viewerPosition;
+    static MapGenerator mapGenerator;
 
     int chunkSize;
     int chunksVisibleInViewDist; // number of chunks around viewer to instantiate
@@ -17,6 +19,7 @@ public class InfiniteTerrain : MonoBehaviour {
     void Start() {
         chunkSize = MapGenerator.mapChunkSize - 1;
         chunksVisibleInViewDist = Mathf.RoundToInt(maxViewDist) / chunkSize;
+        mapGenerator = FindObjectOfType<MapGenerator>();
     }
 
     private void Update() {
@@ -44,7 +47,7 @@ public class InfiniteTerrain : MonoBehaviour {
                         visibleChunks.Add(terrainChunkDictionary[viewedChunkCoord]);
                     }
                 } else {
-                    terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize));
+                    terrainChunkDictionary.Add(viewedChunkCoord, new TerrainChunk(viewedChunkCoord, chunkSize, transform, mapMaterial));
                 }
             }
         }
@@ -56,15 +59,35 @@ public class InfiniteTerrain : MonoBehaviour {
         Vector2 pos;
         Bounds bounds;
 
-        public TerrainChunk(Vector2 coord, int size) {
+        MapData mapData;
+
+        MeshRenderer meshRenderer;
+        MeshFilter meshFilter;
+
+        public TerrainChunk(Vector2 coord, int size, Transform parent, Material material) {
             pos = coord * size;
             Vector3 posV3 = new Vector3(pos.x, 0, pos.y);
             bounds = new Bounds(pos, Vector2.one * size);
 
-            meshObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
+
+            meshObject = new GameObject("Terrain Chunk");
+            meshRenderer = meshObject.AddComponent<MeshRenderer>();
+            meshRenderer.material = material;
+            meshFilter = meshObject.AddComponent<MeshFilter>();
+
             meshObject.transform.position = posV3;
-            meshObject.transform.localScale = Vector3.one * size / 10f; // plane mesh is 10 units by default
+            meshObject.transform.parent = parent;
             SetVisible(false); // default disabled
+
+            mapGenerator.RequestMapData(OnMapDataReceived);
+        }
+
+        void OnMapDataReceived(MapData data) {
+            mapGenerator.RequestMeshData(data, OnMeshDataReceived);
+        }
+
+        void OnMeshDataReceived(MeshData data) {
+            meshFilter.mesh = data.CreateMesh();
         }
 
         public void UpdateTerrainChunk() {
