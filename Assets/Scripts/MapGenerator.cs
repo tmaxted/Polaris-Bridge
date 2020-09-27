@@ -34,7 +34,7 @@ public class MapGenerator : MonoBehaviour {
     Queue<MapThreadInfo<MeshData>> meshDataThreadInfoQueue = new Queue<MapThreadInfo<MeshData>>();
 
     public void DrawMapInEditor() {
-        MapData mapData = GenerateMapData();
+        MapData mapData = GenerateMapData(Vector2.zero);
 
         // display the texture on the screen
         MapDisplay display = FindObjectOfType<MapDisplay>();
@@ -48,16 +48,16 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
-    public void RequestMapData(Action<MapData> callback) {
+    public void RequestMapData(Vector2 center, Action<MapData> callback) {
         ThreadStart threadStart = delegate {
-            MapDataThread(callback);
+            MapDataThread(center, callback);
 	    };
 
         new Thread(threadStart).Start();
     }
 
-    void MapDataThread(Action<MapData> callback) {
-        MapThreadInfo<MapData> mapInfo = new MapThreadInfo<MapData>(callback, GenerateMapData());
+    void MapDataThread(Vector2 center, Action<MapData> callback) {
+        MapThreadInfo<MapData> mapInfo = new MapThreadInfo<MapData>(callback, GenerateMapData(center));
 
         lock (mapDataThreadInfoQueue) {
             mapDataThreadInfoQueue.Enqueue(mapInfo);
@@ -97,8 +97,8 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
-    MapData GenerateMapData() {
-        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistence, lacunarity, offset);
+    MapData GenerateMapData(Vector2 center) {
+        float[,] noiseMap = Noise.GenerateNoiseMap(mapChunkSize, mapChunkSize, seed, noiseScale, octaves, persistence, lacunarity, center + offset);
 
         // create a map of colours depending on the height at the given point
         Color[] colourMap = new Color[mapChunkSize * mapChunkSize];
