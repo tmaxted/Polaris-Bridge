@@ -1,5 +1,5 @@
 # Polaris-Bridge
-Unity Project with procedural map generation, and attempts at simulating ecosystems using neural networks.
+Unity Project with environment generation, and (FUTURE) attempts at simulating ecosystems using neural networks.
 
 
 ## Sources
